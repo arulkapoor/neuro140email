@@ -1,0 +1,35 @@
+import pickle
+import subprocess
+import pandas as pd
+import openai
+
+openai.api_key = "<>"
+
+completions = pickle.load(open( "fine_tune.p", "rb" ) )
+completions2 = pickle.load(open( "fine_tune2.p", "rb" ) )
+completions3 = pickle.load(open( "fine_tune3.p", "rb" ) )
+
+completions = completions + completions2 + completions3
+prompts = []
+emails = []
+for i,c in enumerate(completions):
+    print(i)
+    print(c[c.find("PROMPT:"):c.find("COMPLETION:")])
+    prompts.append(c[c.find("PROMPT:"):c.find("COMPLETION:")]+"###")
+    print("####")
+    print(c[c.find("COMPLETION:"):len(c)])
+    emails.append(c[c.find("COMPLETION:"):len(c)] + "###")
+
+
+
+
+d = {'prompt': prompts, 'completion': emails}
+df = pd.DataFrame(data=d)
+df.to_csv('prepared_data.csv',index=False)
+
+
+## prepared_data.csv --> prepared_data_prepared.json
+subprocess.run('openai tools fine_tunes.prepare_data --file prepared_data.csv --quiet'.split())
+
+## Start fine-tuning
+subprocess.run('openai api fine_tunes.create --training_file prepared_data_prepared.jsonl --model davinci --suffix "EmailIntro"'.split())

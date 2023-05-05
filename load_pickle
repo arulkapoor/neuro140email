@@ -1,0 +1,18 @@
+import pickle
+
+completions = pickle.load(open( "fine_tune.p", "rb" ) )
+completions2 = pickle.load(open( "fine_tune2.p", "rb" ) )
+completions3 = pickle.load(open( "fine_tune3.p", "rb" ) )
+
+completions = completions + completions2 + completions3
+prompts = []
+emails = []
+for i,c in enumerate(completions):
+    print(i)
+    print(c[c.find("PROMPT:"):c.find("COMPLETION:")])
+    prompts.append(c[c.find("PROMPT:"):c.find("COMPLETION:")])
+    print("####")
+    print(c[c.find("COMPLETION:"):len(c)])
+    emails.append(c[c.find("COMPLETION:"):len(c)])
+
+
